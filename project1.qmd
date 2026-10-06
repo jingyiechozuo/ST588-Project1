@@ -308,10 +308,117 @@ return(dplyr::bind_rows(year_data))
 combined_data <- query_census_years(
   years = c(2021, 2022, 2023, 2024)
 )
+combined_data$year <- factor(combined_data$year)
 
 head(combined_data)
 ```
 
 
+```{r numeric functions}
+## create a generic function for numeric summaries 
+summary.census <- function(
+    tibble,
+    numeric_vars = NULL,
+    categorical_vars = NULL) {
+
+  ### if numeric vairbles are not specified, find out which variables in the tibble is numerical, and pass this into numeric_vars to prepare for summary. 
+if (is.null(numeric_vars)) {
+    numeric_vars <- names(tibble)[
+      vapply(tibble, is.numeric, logical(1))
+    ]
+    numeric_vars <- setdiff(numeric_vars, c("PWGTP", "year"))
+  }
+
+# Ignore time variables
+numeric_vars <- numeric_vars[
+    !vapply(tibble[numeric_vars], function(x) {
+      inherits(x, c("POSIXt", "difftime"))
+    }, logical(1))
+  ]
+
+# Treat year as not numeric, but categorical
+if ("year" %in% numeric_vars) {
+  numeric_vars <- setdiff(numeric_vars, "year")
+  categorical_vars <- unique(c(categorical_vars, "year"))
+}
+
+if (is.null(categorical_vars)) {
+    categorical_vars <- names(tibble)[
+      vapply(tibble, is.factor, logical(1))
+    ]
+
+if ("year" %in% names(tibble)) {
+      categorical_vars <- unique(c(categorical_vars, "year"))
+    }
+  }
+
+## pass the parameters of which variable and its weight into different kinds of summariy function. 
+numeric_summary <- lapply(numeric_vars, function(variable) {
+    x <- tibble[[variable]]
+    w <- tibble$PWGTP
+## exclude all the observations with missing values
+    keep <- !is.na(x) & !is.na(w)
+    x <- x[keep]
+    w <- w[keep]
+
+    sample_mean <- sum(x * w) / sum(w)
+    sample_sd <- sqrt(sum(x^2 * w) / sum(w) - sample_mean^2)
+
+    c(mean = sample_mean, sd = sample_sd)
+  })
+  names(numeric_summary) <- numeric_vars
+
+### categorical variables summarize   
+  categorical_summary <- lapply(categorical_vars, function(variable) {
+    x <- tibble[[variable]]
+    w <- tibble$PWGTP
+## exclude the observations with missing values 
+    keep <- !is.na(x) & !is.na(w)
+
+# apply function on each gorup 
+    tapply(w[keep], x[keep], sum, default = 0)
+  })
+  names(categorical_summary) <- categorical_vars
+
+  return(list(
+    numeric = numeric_summary,
+    categorical = categorical_summary
+  ))
+}
 ```
 
+## plot 
+
+
+``` {r plot }
+
+plot.census <- function(x, ca_var, nu_var, ...) {
+
+## check if users input one numeric and one categorical 
+  if (length(ca_var) != 1 || length(nu_var) != 1) {
+    stop("Specify only one categorical variable and only one numeric variable.")
+  }
+
+## check if users input really categorical 
+  if (!is.factor(x[[ca_var]])) {
+    stop("ca_var should be categorical.")
+  }
+## check if users input really numerical 
+  if (!is.numeric(x[[nu_var]]))
+      inherits(x[[nu_var]], c("POSIXt", "difftime"))) {
+    stop("nu_var should be numeric.")
+  }
+
+## return a plot
+  return(
+    ggplot2::ggplot(
+      x,
+      ggplot2::aes(
+        x = factor(get(ca_var)),
+        y = get(nu_var),
+        weight = PWGTP
+      )
+    ) +
+      ggplot2::geom_boxplot()
+  )
+}
