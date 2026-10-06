@@ -4,6 +4,11 @@ Author: Jingyi Zuo
 format: html
 ---
 
+#introduction
+In this project, we write functions to get data from the Census API, clean data and summarize it. Each row has a weight  showing how many people it represents, so our summaries and plots use this weight. Finally, we use some case to test the functions and explore some patterns.  
+
+# store API
+We store the API here and keep it secert. 
 ```{r store API}
 library(httr)
 library(jsonlite)
@@ -17,9 +22,20 @@ library(lubridate)
 
 ```
 
-# Write a function to GET() the URL, parse the JSON, and pull out a list of the variables with their values.
+# After trying the API using 2024 data, we write a function to request the API, parse the JSON, and pull out the variable dictionary. 
 
 ```{r Parsing Variable Values}
+
+url <- ("https://api.census.gov/data/2024/acs/acs1/pums")
+response <- GET((url),
+                query = list( key = Sys.getenv("API_KEY")))
+### obtain JSON text
+content <- content(response, as = "text", encoding = "UTF-8")
+###  parse the return
+result <- fromJSON(content, flatten = FALSE)
+head(result)
+
+
 census_api <- function(year) {
 # set url with input "year"
 url <- paste0("https://api.census.gov/data/", year, "/acs/acs1/pums")
@@ -60,7 +76,8 @@ saveRDS(alldata, file = "data/allyears.rds")
 ```
 
 
-## Parsing API Data  
+# Parsing API Data  
+In this section, we first test a simple API call for Florida in 2024 to see what the raw data looks like. We created "transfer_tibble", which is a helper function turns the API response into a tibble, using the first row as column names. We created time_midpoint (with the help of LLM) to turn time ranges (like "7:00 a.m. to 7:04 a.m.") into the midpoint time. We create query_census, which is our main function. It checks the user's inputs, calls the API, and returns a clean tibble with numbers, times, and factortype variabes. 
 
 ```{r parse API data and write a new function}
 library(httr)
@@ -275,7 +292,8 @@ data_tibble <- transfer_tibble(response)
 View(data_tibble)
 }
 ```
-
+# Combine years
+Now we create a function to allow users to return multiple years' data and combine them into one tibble based on calling "query_census" function. 
 ```{r combine years}
 query_census_years <- function(
     years = 2024,
@@ -286,6 +304,7 @@ query_census_years <- function(
 year_data <- lapply(years, function(year) {
 
 ### request data
+  
 census_data <- query_census(
       year = year,
       variables = variables,
@@ -299,16 +318,20 @@ census_data$year <- year
   })
 
 
-return(dplyr::bind_rows(year_data))
+return(dplyr::bind_rows(year_data) |>
+         # force year to factor type variable 
+  dplyr::mutate(year = factor(year)))
 }
 combined_data <- query_census_years(
   years = c(2021, 2022, 2023, 2024)
 )
-combined_data$year <- factor(combined_data$year)
+
 
 head(combined_data)
 ```
 
+# Write summrize functions 
+Now we have returned a tibble; then we create a generic function for summaries. This function gives the weighted mean and standard deviation for numeric variables and weighted counts for categorical variables. 
 
 ```{r numeric functions}
 ## we have returned a tibble; then we create a generic function for summaries 
@@ -382,7 +405,8 @@ numeric_summary <- lapply(numeric_vars, function(variable) {
 }
 ```
 
-## plot 
+# plot function
+Then we create some plot functions. This function makes a weighted boxplot of one numeric variable across the levels of one categorical variable, which allows us to check the association beween a categorical variable and a numerical variable use their distribution, and it is a description, but not a statistical inference. 
 
 
 ``` {r plot}
@@ -421,7 +445,7 @@ plot.census <- function(x, ca_var, nu_var, ...) {
 ```
 
 ## Test functions
-Now we created four main functions: transfer_tibble(), query_census_years, summary.census()、plot.census(). We are going to test them.
+Now we created four main functions: transfer_tibble(), query_census_years, summary.census()、plot.census(). We are going to test them with a case of the association betweem household language (categorical variable), and the age (numerical variable). 
 
 ``` {r investigation}
 ### Now we created 4 main functions for later using: query_census_years, summary.census()、plot.census() 
@@ -436,11 +460,11 @@ query_1 <- query_census_years(
     geography_values = 12)
 
 
-summary_query_1 <- summary.census(query_1)
+summary_query_1 <- summary(query_1)
 summary_query_1
 
-plot_school_age <- plot.census(query_1, ca_var = "HHL", nu_var = "AGEP")
-  plot_school_age 
+plot_hhl_age <- plot(query_1, ca_var = "HHL", nu_var = "AGEP")
+  plot_hhl_age 
 
 ```
 From the boxplot, we found that the age distribution is similar in household lanaguge groups, no clear pattern of the association between age and household language. 
