@@ -1,0 +1,58 @@
+---
+title: "project1"
+Author: Jingyi Zuo
+format: html
+---
+
+library(httr)
+library(jsonlite)
+
+
+# Write a function to GET() the URL, parse the JSON, and pull out a list of the variables with their values.
+
+census_api <- function(year) {
+# set url with input "year"
+url <- paste0("https://api.census.gov/data/", year, "/acs/acs1/pums")
+
+response <- GET((url),
+      query = list(key=Sys.getenv("API_KEY")))
+### obtain JSON text
+content <- content(response, as = "text", encoding = "UTF-8")
+###  parse the return
+result <- fromJSON(content, flatten = FALSE)
+
+### according to the returned content we parsed, we know the address of variables codebook is in c_variablesLink 
+variable <- fromJSON(
+content(GET(result$dataset$c_variablesLink,
+      query = list(key=Sys.getenv("API_KEY"))), 
+      as = "text",
+      encoding = "UTF-8"),
+            flatten = FALSE)
+            
+### set the variables we need in each year
+var_state <- 
+if (year %in% c(2021,2022)) "ST" 
+else "STATE"
+
+var_selected <- variable$variables[c("AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP", "PWGTP", "FER", "HHL", "SCH", "SCHL", "SEX", var_state,"REGION", "DIVISION")]
+return(var_selected)
+}
+
+### apply function in eachyear 
+variable_2021 <- census_api(2021)
+variable_2022 <- census_api(2022)
+variable_2023 <- census_api(2023)
+variable_2024 <- census_api(2024)
+
+alldata <- list(variable_2021, variable_2022, variable_2023, variable_2024)
+saveRDS(alldata, file = "data/allyears.rds")
+
+
+
+
+
+
+
+
+
+
