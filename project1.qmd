@@ -10,6 +10,9 @@ library(jsonlite)
 library(jsonlite)
 # Store the API as an environment variable and reference it when access data.
   Sys.setenv(API_KEY = "b8e505a6fa8a9e78a5c7cbcf0bac66162486d10e")
+  
+library(lubridate)
+  library(dplyr)
 
 ```
 
@@ -65,12 +68,18 @@ library(jsonlite)
 
 url <- ("https://api.census.gov/data/2024/acs/acs1/pums")
 response <- GET((url),
-      query = list(key=Sys.getenv("API_KEY")))
+                query = list(
+                  get = "PWGTP,AGEP,SEX",
+                  `for` = "state:12",
+                  key = Sys.getenv("API_KEY")
+))
 ### obtain JSON text
 content <- content(response, as = "text", encoding = "UTF-8")
 ###  parse the return
 result <- fromJSON(content, flatten = FALSE)
-View(result$dataset) 
+head(result)
+
+
 
 
 
@@ -94,10 +103,40 @@ transfer_tibble <- function(response) {
   return(tibble::as_tibble(result))
 }
 
-##set up a query function, and the defalut value of year is 2024
+### turns value into times 
+time_midpoint <- function(labels) {
+clock_minutes <- function(clock) {
+    clock <- gsub(".", "", clock, fixed = TRUE)
+    parts <- strsplit(trimws(clock), "[: ]+")[[1]]
+
+    hour <- as.numeric(parts[1]) %% 12
+    if (parts[3] == "pm") hour <- hour + 12
+
+    hour * 60 + as.numeric(parts[2])
+  }
+
+midpoint <- vapply(labels, function(label) {
+    if (is.na(label) || !grepl(" to ", label, fixed = TRUE)) {
+      return(NA_real_)
+    }
+
+    endpoints <- strsplit(label, " to ", fixed = TRUE)[[1]]
+    start <- clock_minutes(endpoints[1])
+    end <- clock_minutes(endpoints[2])
+
+    if (end < start) end <- end + 1440
+
+    ((start + end) / 2) %% 1440
+  }, numeric(1))
+
+return(
+    lubridate::as_datetime(unname(midpoint) * 60, tz = "UTC")
+  )
+}
+
+##set up a query function, and the default value of year is 2024
 query_census <- function(
     year = 2024,
-    numeric_vars = c("AGEP", "PWGTP"),
     variables = c("AGEP", "PWGTP", "SEX"),
     geography = "State",
     geography_values = NULL) {
@@ -122,6 +161,157 @@ if (!"PWGTP" %in% numeric_vars ||
 if (length(categorical_vars) == 0) {
   stop("Include at least one categorical variable.")
 }  
-    
 
+## Check whether the input year is legal
+if (length(year) != 1 || !year %in% 2021:2024) {
+  stop("Year is illegal: Choose one year: 2021, 2022, 2023, or 2024.")
+}
+
+## Check geography level
+if (length(geography) != 1 ||
+    !geography %in% c("Region", "Division", "State")) {
+  stop("Choose one geography level: Region, Division, or State.")
+}
+
+
+##Read  dictionary of the input year's
+alldata <- readRDS("data/allyears.rds")
+dictionary <- alldata[[as.character(year)]] 
+
+##Choose the geography variable 
+state_var <- if (year %in% c(2021, 2022)) "ST" else "STATE"
+
+## 
+
+## Set default geography vafiables 
+if (geography == "Region") {
+  geography_var <- "REGION"
+} else if (geography == "Division") {
+  geography_var <- "DIVISION"
+} else if (geography == "State") { 
+  geography_var <- state_var
+}
+
+## Get legal geography codes from the dictionary
+geography_labels <- unlist(
+  dictionary[[geography_var]]$values$item
+)
+
+## add default values
+if (is.null(geography_values)) {
+  if (geography == "Region") {
+    geography_values <- "1"
+  } else if (geography == "Division") {
+    geography_values <- "2"
+  } else {
+    geography_values <- "12"
+  }
+}
+
+geography_values <- as.character(geography_values)
+
+# Allow "all" in values, otherwise check the geography codes
+if (length(geography_values) == 1 &&
+    tolower(geography_values) == "all") {
+
+  geography_codes <- "*"
+
+} 
+else {
+
+  if (length(geography_values) == 0 ||
+      !all(geography_values %in% names(geography_labels))) {
+    stop("Invalid geography code.")
+  }
+
+  geography_codes <- paste(geography_values, collapse = ",")
+}
+
+
+
+### apply api request 
+url <- paste0(
+  "https://api.census.gov/data/", year, "/acs/acs1/pums"
+)
+
+response <- GET(
+  url,
+  query = list(
+    get = paste(variables, collapse = ","),
+    `for` = paste0(tolower(geography), ":", geography_codes),
+    key = Sys.getenv("API_KEY")
+  )
+)
+
+
+## apply hepler function 
+data_tibble <- transfer_tibble(response)
+for (variable in numeric_vars) {
+  labels <- unlist(dictionary[[variable]]$values$item)
+  values <- as.numeric(data_tibble[[variable]])
+
+  if (variable %in% c("JWAP", "JWDP")) {
+    time_labels <- labels[
+      match(values, as.numeric(names(labels)))
+    ]
+    data_tibble[[variable]] <- time_midpoint(time_labels)
+  } else {
+    missing_codes <- names(labels)[grepl("^N/A", labels)]
+    values[values %in% as.numeric(missing_codes)] <- NA_real_
+    data_tibble[[variable]] <- values
+  }
+}
+
+for (variable in categorical_vars) {
+  labels <- unlist(dictionary[[variable]]$values$item)
+  labels <- labels[order(as.numeric(names(labels)))]
+
+  data_tibble[[variable]] <- factor(
+    as.numeric(data_tibble[[variable]]),
+    levels = as.numeric(names(labels)),
+    labels = unname(labels)
+  )
+}
+
+class(data_tibble) <- c("census", class(data_tibble))
+return(data_tibble)
+data_tibble <- transfer_tibble(response)
+View(data_tibble)
+}
+```
+
+```{r combine years}
+query_census_years <- function(
+    years = 2024,
+    variables = c("AGEP", "PWGTP", "SEX"),
+    geography = "State",
+    geography_values = NULL) {
+
+year_data <- lapply(years, function(year) {
+
+### request data
+census_data <- query_census(
+      year = year,
+      variables = variables,
+      geography = geography,
+      geography_values = geography_values
+    )
+
+## add year for variables 
+census_data$year <- year
+    return(census_data)
+  })
+
+
+return(dplyr::bind_rows(year_data))
+}
+combined_data <- query_census_years(
+  years = c(2021, 2022, 2023, 2024)
+)
+
+head(combined_data)
+```
+
+
+```
 
