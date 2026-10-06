@@ -6,6 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Jingyi Zuo">
 
 <title>project1</title>
 <style>
@@ -86,6 +87,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <div class="quarto-title-meta">
 
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Jingyi Zuo </p>
+          </div>
+  </div>
     
   
     
@@ -108,7 +115,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(jsonlite)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(jsonlite)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Store the API as an environment variable and reference it when access data.</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">Sys.setenv</span>(<span class="at">API_KEY =</span> <span class="st">"b8e505a6fa8a9e78a5c7cbcf0bac66162486d10e"</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Sys.setenv(API_KEY = "")</span></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
@@ -641,22 +648,21 @@ $dataset
 </div>
 <section id="test-functions" class="level2">
 <h2 class="anchored" data-anchor-id="test-functions">Test functions</h2>
-<p>Now we created four main functions: transfer_tibble(), query_census_years, summary.census()、plot.census(). We are going to test them with a case of the association betweem household language (categorical variable), and the age (numerical variable).</p>
+<p>Now we created three main functions: query_census_years, summary.census()、plot.census(). We are going to test them with a case of the association betweem household language (categorical variable), and the age (numerical variable). After that, we continue to test other two case.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Now we created 4 main functions for later using: query_census_years, summary.census()、plot.census() </span></span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="do">## We are going to test them.</span></span>
 <span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="do">##set up a query function, and the default value of year is 2024</span></span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>query_1 <span class="ot">&lt;-</span> <span class="fu">query_census_years</span>(</span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">years =</span> <span class="fu">c</span>(<span class="dv">2021</span>,<span class="dv">2022</span>,<span class="dv">2023</span>,<span class="dv">2024</span>),</span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">variables =</span> <span class="fu">c</span>(<span class="st">"SCHL"</span>, <span class="st">"PWGTP"</span>, <span class="st">"SEX"</span>,<span class="st">"AGEP"</span>,<span class="st">"HHL"</span>),</span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">geography =</span> <span class="st">"State"</span>,</span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">geography_values =</span> <span class="dv">12</span>)</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>query_1 <span class="ot">&lt;-</span> <span class="fu">query_census_years</span>(</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">years =</span> <span class="fu">c</span>(<span class="dv">2021</span>,<span class="dv">2022</span>,<span class="dv">2023</span>,<span class="dv">2024</span>),</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">variables =</span> <span class="fu">c</span>(<span class="st">"SCHL"</span>, <span class="st">"PWGTP"</span>, <span class="st">"SEX"</span>,<span class="st">"AGEP"</span>,<span class="st">"HHL"</span>),</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">geography =</span> <span class="st">"State"</span>,</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">geography_values =</span> <span class="dv">12</span>)</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>summary_query_1 <span class="ot">&lt;-</span> <span class="fu">summary</span>(query_1)</span>
-<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>summary_query_1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>summary_query_1 <span class="ot">&lt;-</span> <span class="fu">summary</span>(query_1)</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>summary_query_1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$numeric
 $numeric$AGEP
@@ -735,9 +741,6 @@ $categorical$year
 </div>
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>plot_hhl_age <span class="ot">&lt;-</span> <span class="fu">plot</span>(query_1, <span class="at">ca_var =</span> <span class="st">"HHL"</span>, <span class="at">nu_var =</span> <span class="st">"AGEP"</span>)</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  plot_hhl_age </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in rq.fit.br(wx, wy, tau = tau, ...): Solution may be nonunique</code></pre>
-</div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -746,19 +749,19 @@ $categorical$year
 </div>
 </div>
 </div>
-<p>From the boxplot, we found that the age distribution is similar in household lanaguge groups, no clear pattern of the association between age and household language.</p>
+<p>From the boxplot, we found that the age distribution is similar in household lanaguge groups, no overall clear pattern of the association between age and household language, but English-only households have a higher median agethan the other groups.</p>
 </section>
 </section>
 <section id="other-test-cases" class="level1">
 <h1>other test cases</h1>
 <p>request time type variables</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># call time variables </span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>query_2 <span class="ot">&lt;-</span> <span class="fu">query_census_years</span>(</span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">years =</span> <span class="dv">2024</span>,</span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">variables =</span> <span class="fu">c</span>(<span class="st">"PWGTP"</span>, <span class="st">"JWAP"</span>, <span class="st">"JWDP"</span>, <span class="st">"JWMNP"</span>, <span class="st">"SEX"</span>)</span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(query_2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># call time variables </span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>query_2 <span class="ot">&lt;-</span> <span class="fu">query_census_years</span>(</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">years =</span> <span class="dv">2024</span>,</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">variables =</span> <span class="fu">c</span>(<span class="st">"PWGTP"</span>, <span class="st">"JWAP"</span>, <span class="st">"JWDP"</span>, <span class="st">"JWMNP"</span>, <span class="st">"SEX"</span>)</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(query_2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 6 × 7
   PWGTP JWAP   JWDP   JWMNP SEX   state year 
@@ -770,7 +773,7 @@ $categorical$year
 5    46 NA     NA        NA Male  12    2024 
 6    49 NA     NA        NA Male  12    2024 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(query_2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(query_2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$numeric
 $numeric$JWMNP
@@ -787,29 +790,18 @@ $categorical$year
     2024 
 23372215 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(query_2, <span class="at">ca_var =</span> <span class="st">"SEX"</span>, <span class="at">nu_var =</span> <span class="st">"JWMNP"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: Removed 133769 rows containing non-finite outside the scale range
-(`stat_boxplot()`).</code></pre>
-</div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="project1_files/figure-html/test%20case-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>plot2 <span class="ot">&lt;-</span> <span class="fu">plot</span>(query_2, <span class="at">ca_var =</span> <span class="st">"SEX"</span>, <span class="at">nu_var =</span> <span class="st">"JWMNP"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>use division as geography variable.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Use a different geography level (Division = 1)</span></span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>query_3 <span class="ot">&lt;-</span> <span class="fu">query_census_years</span>(</span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">years =</span> <span class="dv">2024</span>,</span>
-<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">variables =</span> <span class="fu">c</span>(<span class="st">"PWGTP"</span>, <span class="st">"AGEP"</span>, <span class="st">"SCH"</span>),</span>
-<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">geography =</span> <span class="st">"Division"</span>,</span>
-<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">geography_values =</span> <span class="dv">1</span></span>
-<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(query_3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Use a different geography level (Division = 1)</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>query_3 <span class="ot">&lt;-</span> <span class="fu">query_census_years</span>(</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">years =</span> <span class="dv">2024</span>,</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">variables =</span> <span class="fu">c</span>(<span class="st">"PWGTP"</span>, <span class="st">"AGEP"</span>, <span class="st">"SCH"</span>),</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">geography =</span> <span class="st">"Division"</span>,</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">geography_values =</span> <span class="dv">1</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(query_3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$numeric
 $numeric$AGEP

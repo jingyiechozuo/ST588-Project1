@@ -1,6 +1,6 @@
 ---
 title: "project1"
-Author: Jingyi Zuo
+author: Jingyi Zuo
 format: html
 ---
 
@@ -14,7 +14,7 @@ library(httr)
 library(jsonlite)
 library(jsonlite)
 # Store the API as an environment variable and reference it when access data.
-  Sys.setenv(API_KEY = "b8e505a6fa8a9e78a5c7cbcf0bac66162486d10e")
+  # Sys.setenv(API_KEY = "")
   
 library(lubridate)
   library(dplyr)
@@ -445,20 +445,13 @@ plot.census <- function(x, ca_var, nu_var, ...) {
 ```
 
 ## Test functions
-Now we created four main functions: transfer_tibble(), query_census_years, summary.census()、plot.census(). We are going to test them with a case of the association betweem household language (categorical variable), and the age (numerical variable). 
-
-
-
-
-
-
+Now we created three main functions:  query_census_years, summary.census()、plot.census(). We are going to test them with a case of the association betweem household language (categorical variable), and the age (numerical variable). After that, we continue to test other two case. 
 
 ``` {r investigation}
 ### Now we created 4 main functions for later using: query_census_years, summary.census()、plot.census() 
 
 ## We are going to test them.
 
-##set up a query function, and the default value of year is 2024
 query_1 <- query_census_years(
     years = c(2021,2022,2023,2024),
     variables = c("SCHL", "PWGTP", "SEX","AGEP","HHL"),
@@ -473,7 +466,7 @@ plot_hhl_age <- plot(query_1, ca_var = "HHL", nu_var = "AGEP")
   plot_hhl_age 
 
 ```
-From the boxplot, we found that the age distribution is similar in household lanaguge groups, no clear pattern of the association between age and household language. 
+From the boxplot, we found that the age distribution is similar in household lanaguge groups, no overall clear pattern of the association between age and household language, but English-only households have a higher median agethan the other groups.
 
 
 # other test cases
@@ -487,7 +480,8 @@ query_2 <- query_census_years(
 )
 head(query_2)
 summary(query_2)
-plot(query_2, ca_var = "SEX", nu_var = "JWMNP")
+plot2 <- plot(query_2, ca_var = "SEX", nu_var = "JWMNP")
+
 ```
 
 use division as geography variable. 
@@ -501,13 +495,3 @@ query_3 <- query_census_years(
 )
 summary(query_3)
 ```
-
-
-```{r investigation about sex and education attainments }
-
-
-
-
-
-
-
