@@ -13,6 +13,7 @@ library(jsonlite)
   
 library(lubridate)
   library(dplyr)
+  library(quantreg) 
 
 ```
 
@@ -78,11 +79,6 @@ content <- content(response, as = "text", encoding = "UTF-8")
 ###  parse the return
 result <- fromJSON(content, flatten = FALSE)
 head(result)
-
-
-
-
-
 
 
 ## helper 
@@ -315,13 +311,14 @@ head(combined_data)
 
 
 ```{r numeric functions}
-## create a generic function for numeric summaries 
+## we have returned a tibble; then we create a generic function for summaries 
 summary.census <- function(
     tibble,
     numeric_vars = NULL,
     categorical_vars = NULL) {
 
-  ### if numeric vairbles are not specified, find out which variables in the tibble is numerical, and pass this into numeric_vars to prepare for summary. 
+#####check input, find out which variables should be suitable to be summarized. 
+  ### if numeric variables are not specified explicitly, find out which variables in the tibble is numerical, and pass this into numeric_vars to prepare for summary. 
 if (is.null(numeric_vars)) {
     numeric_vars <- names(tibble)[
       vapply(tibble, is.numeric, logical(1))
@@ -336,21 +333,19 @@ numeric_vars <- numeric_vars[
     }, logical(1))
   ]
 
-# Treat year as not numeric, but categorical
+## if users didn't input any categorial variables, we take all the factor-type variables in the tibble to summarize. 
+if (is.null(categorical_vars)) {
+  categorical_vars <- names(tibble)[
+    vapply(tibble, is.factor, logical(1))
+  ]
+}
+
+# Treat year as categorical: if users input year as numeric, we take it into categorical (it has been transferred to factor)
 if ("year" %in% numeric_vars) {
   numeric_vars <- setdiff(numeric_vars, "year")
   categorical_vars <- unique(c(categorical_vars, "year"))
 }
 
-if (is.null(categorical_vars)) {
-    categorical_vars <- names(tibble)[
-      vapply(tibble, is.factor, logical(1))
-    ]
-
-if ("year" %in% names(tibble)) {
-      categorical_vars <- unique(c(categorical_vars, "year"))
-    }
-  }
 
 ## pass the parameters of which variable and its weight into different kinds of summariy function. 
 numeric_summary <- lapply(numeric_vars, function(variable) {
@@ -399,17 +394,18 @@ plot.census <- function(x, ca_var, nu_var, ...) {
     stop("Specify only one categorical variable and only one numeric variable.")
   }
 
-## check if users input really categorical 
+## check if users input really categorical, if not, output alarm 
   if (!is.factor(x[[ca_var]])) {
     stop("ca_var should be categorical.")
   }
-## check if users input really numerical 
-  if (!is.numeric(x[[nu_var]]))
-      inherits(x[[nu_var]], c("POSIXt", "difftime"))) {
+## check if users input really numerical, if not, output alarm 
+  if (!is.numeric(x[[nu_var]])){
     stop("nu_var should be numeric.")
   }
 
-## return a plot
+## return a plot: create a boxplot of the numeric variable at the levels of the categorical variable.
+  
+  
   return(
     ggplot2::ggplot(
       x,
@@ -422,3 +418,41 @@ plot.census <- function(x, ca_var, nu_var, ...) {
       ggplot2::geom_boxplot()
   )
 }
+```
+
+## Test functions
+Now we created four main functions: transfer_tibble(), query_census_years, summary.census()、plot.census(). We are going to test them.
+
+``` {r test all the functions?}
+### Now we created 4 main functions for later using: query_census_years, summary.census()、plot.census() 
+
+## We are going to test them.
+
+##set up a query function, and the default value of year is 2024
+query_1 <- query_census_years(
+    years = c(2021,2022,2023,2024),
+    variables = c("SCHL", "PWGTP", "SEX","AGEP","HHL"),
+    geography = "State",
+    geography_values = 12)
+
+
+summary_query_1 <- summary.census(query_1)
+summary_query_1
+
+plot_school_age <- plot.census(query_1, ca_var = "HHL", nu_var = "AGEP")
+  plot_school_age 
+
+```
+
+
+
+
+
+```{r investigation about sex and education attainments }
+
+
+
+
+
+
+
