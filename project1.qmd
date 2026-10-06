@@ -4,7 +4,7 @@ author: Jingyi Zuo
 format: html
 ---
 
-#introduction
+# introduction
 In this project, we write functions to get data from the Census API, clean data and summarize it. Each row has a weight  showing how many people it represents, so our summaries and plots use this weight. Finally, we use some case to test the functions and explore some patterns.  
 
 # store API
@@ -445,6 +445,7 @@ plot.census <- function(x, ca_var, nu_var, ...) {
 ```
 
 ## Test functions
+# Investigation 
 Now we created three main functions:  query_census_years, summary.census()、plot.census(). We are going to test them with a case of the association betweem household language (categorical variable), and the age (numerical variable). After that, we continue to test other two case. 
 
 ``` {r investigation}

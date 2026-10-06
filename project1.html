@@ -103,7 +103,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>#introduction In this project, we write functions to get data from the Census API, clean data and summarize it. Each row has a weight showing how many people it represents, so our summaries and plots use this weight. Finally, we use some case to test the functions and explore some patterns.</p>
+<section id="introduction" class="level1">
+<h1>introduction</h1>
+<p>In this project, we write functions to get data from the Census API, clean data and summarize it. Each row has a weight showing how many people it represents, so our summaries and plots use this weight. Finally, we use some case to test the functions and explore some patterns.</p>
+</section>
 <section id="store-api" class="level1">
 <h1>store API</h1>
 <p>We store the API here and keep it secert.</p>
@@ -648,6 +651,10 @@ $dataset
 </div>
 <section id="test-functions" class="level2">
 <h2 class="anchored" data-anchor-id="test-functions">Test functions</h2>
+</section>
+</section>
+<section id="investigation" class="level1">
+<h1>Investigation</h1>
 <p>Now we created three main functions: query_census_years, summary.census()、plot.census(). We are going to test them with a case of the association betweem household language (categorical variable), and the age (numerical variable). After that, we continue to test other two case.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Now we created 4 main functions for later using: query_census_years, summary.census()、plot.census() </span></span>
@@ -750,7 +757,6 @@ $categorical$year
 </div>
 </div>
 <p>From the boxplot, we found that the age distribution is similar in household lanaguge groups, no overall clear pattern of the association between age and household language, but English-only households have a higher median agethan the other groups.</p>
-</section>
 </section>
 <section id="other-test-cases" class="level1">
 <h1>other test cases</h1>
