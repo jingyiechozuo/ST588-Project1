@@ -749,6 +749,91 @@ $categorical$year
 <p>From the boxplot, we found that the age distribution is similar in household lanaguge groups, no clear pattern of the association between age and household language.</p>
 </section>
 </section>
+<section id="other-test-cases" class="level1">
+<h1>other test cases</h1>
+<p>request time type variables</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># call time variables </span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>query_2 <span class="ot">&lt;-</span> <span class="fu">query_census_years</span>(</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">years =</span> <span class="dv">2024</span>,</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">variables =</span> <span class="fu">c</span>(<span class="st">"PWGTP"</span>, <span class="st">"JWAP"</span>, <span class="st">"JWDP"</span>, <span class="st">"JWMNP"</span>, <span class="st">"SEX"</span>)</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(query_2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 7
+  PWGTP JWAP   JWDP   JWMNP SEX   state year 
+  &lt;dbl&gt; &lt;dttm&gt; &lt;dttm&gt; &lt;dbl&gt; &lt;fct&gt; &lt;chr&gt; &lt;fct&gt;
+1    38 NA     NA        NA Male  12    2024 
+2    55 NA     NA        NA Male  12    2024 
+3    16 NA     NA        NA Male  12    2024 
+4    62 NA     NA        NA Male  12    2024 
+5    46 NA     NA        NA Male  12    2024 
+6    49 NA     NA        NA Male  12    2024 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(query_2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$numeric
+$numeric$JWMNP
+    mean       sd 
+28.92946 22.74355 
+
+
+$categorical
+$categorical$SEX
+    Male   Female 
+11492766 11879449 
+
+$categorical$year
+    2024 
+23372215 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(query_2, <span class="at">ca_var =</span> <span class="st">"SEX"</span>, <span class="at">nu_var =</span> <span class="st">"JWMNP"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 133769 rows containing non-finite outside the scale range
+(`stat_boxplot()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="project1_files/figure-html/test%20case-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>use division as geography variable.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Use a different geography level (Division = 1)</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>query_3 <span class="ot">&lt;-</span> <span class="fu">query_census_years</span>(</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">years =</span> <span class="dv">2024</span>,</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">variables =</span> <span class="fu">c</span>(<span class="st">"PWGTP"</span>, <span class="st">"AGEP"</span>, <span class="st">"SCH"</span>),</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">geography =</span> <span class="st">"Division"</span>,</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">geography_values =</span> <span class="dv">1</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(query_3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$numeric
+$numeric$AGEP
+    mean       sd 
+41.51816 23.34190 
+
+
+$categorical
+$categorical$SCH
+                  N/A (less than 3 years old) 
+                                       412683 
+    No, has not attended in the last 3 months 
+                                     11428848 
+         Yes, public school or public college 
+                                      2662576 
+Yes, private school or college or home school 
+                                       881978 
+
+$categorical$year
+    2024 
+15386085 </code></pre>
+</div>
+</div>
+</section>
 
 </main>
 <!-- /main column -->

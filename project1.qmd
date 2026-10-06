@@ -447,6 +447,12 @@ plot.census <- function(x, ca_var, nu_var, ...) {
 ## Test functions
 Now we created four main functions: transfer_tibble(), query_census_years, summary.census()、plot.census(). We are going to test them with a case of the association betweem household language (categorical variable), and the age (numerical variable). 
 
+
+
+
+
+
+
 ``` {r investigation}
 ### Now we created 4 main functions for later using: query_census_years, summary.census()、plot.census() 
 
@@ -470,6 +476,31 @@ plot_hhl_age <- plot(query_1, ca_var = "HHL", nu_var = "AGEP")
 From the boxplot, we found that the age distribution is similar in household lanaguge groups, no clear pattern of the association between age and household language. 
 
 
+# other test cases
+request time type variables 
+```{r test case}
+
+# call time variables 
+query_2 <- query_census_years(
+  years = 2024,
+  variables = c("PWGTP", "JWAP", "JWDP", "JWMNP", "SEX")
+)
+head(query_2)
+summary(query_2)
+plot(query_2, ca_var = "SEX", nu_var = "JWMNP")
+```
+
+use division as geography variable. 
+```{r}
+# Use a different geography level (Division = 1)
+query_3 <- query_census_years(
+  years = 2024,
+  variables = c("PWGTP", "AGEP", "SCH"),
+  geography = "Division",
+  geography_values = 1
+)
+summary(query_3)
+```
 
 
 ```{r investigation about sex and education attainments }
