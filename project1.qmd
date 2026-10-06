@@ -4,12 +4,18 @@ Author: Jingyi Zuo
 format: html
 ---
 
+```{r store API}
 library(httr)
 library(jsonlite)
+library(jsonlite)
+# Store the API as an environment variable and reference it when access data.
+  Sys.setenv(API_KEY = "b8e505a6fa8a9e78a5c7cbcf0bac66162486d10e")
 
+```
 
 # Write a function to GET() the URL, parse the JSON, and pull out a list of the variables with their values.
 
+```{r Parsing Variable Values}
 census_api <- function(year) {
 # set url with input "year"
 url <- paste0("https://api.census.gov/data/", year, "/acs/acs1/pums")
@@ -45,14 +51,77 @@ variable_2023 <- census_api(2023)
 variable_2024 <- census_api(2024)
 
 alldata <- list(variable_2021, variable_2022, variable_2023, variable_2024)
+names(alldata) <- c("2021","2022","2023","2024")
 saveRDS(alldata, file = "data/allyears.rds")
+```
+
+
+## Parsing API Data  
+
+```{r parse API data and write a new function}
+library(httr)
+library(jsonlite)
+
+
+url <- ("https://api.census.gov/data/2024/acs/acs1/pums")
+response <- GET((url),
+      query = list(key=Sys.getenv("API_KEY")))
+### obtain JSON text
+content <- content(response, as = "text", encoding = "UTF-8")
+###  parse the return
+result <- fromJSON(content, flatten = FALSE)
+View(result$dataset) 
 
 
 
 
 
+## helper 
+transfer_tibble <- function(response) {
+  data_content <- content(
+    response,
+    as = "text",
+    encoding = "UTF-8"
+  )
 
+  result <- fromJSON(data_content)
 
+#deal with colmmn_names
+  column_names <- result[1, ]
+  result <- result[-1, , drop = FALSE]
+  colnames(result) <- column_names
 
+  return(tibble::as_tibble(result))
+}
+
+##set up a query function, and the defalut value of year is 2024
+query_census <- function(
+    year = 2024,
+    numeric_vars = c("AGEP", "PWGTP"),
+    variables = c("AGEP", "PWGTP", "SEX"),
+    geography = "State",
+    geography_values = NULL) {
+
+legal_numeric_vars <- c(
+  "AGEP", "GASP", "GRPIP", "JWAP", "JWDP", "JWMNP", "PWGTP"
+)
+legal_categorical_vars <- c("FER", "HHL", "SCH", "SCHL", "SEX")
+
+if (!all(variables %in% c(legal_numeric_vars, legal_categorical_vars))) {
+  stop("Invalid variable.")
+}
+
+numeric_vars <- variables[variables %in% legal_numeric_vars]
+categorical_vars <- variables[variables %in% legal_categorical_vars]
+
+if (!"PWGTP" %in% numeric_vars ||
+    length(setdiff(numeric_vars, "PWGTP")) == 0) {
+  stop("Include PWGTP and at least one other numeric variable.")
+}
+
+if (length(categorical_vars) == 0) {
+  stop("Include at least one categorical variable.")
+}  
+    
 
 
